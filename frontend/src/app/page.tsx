@@ -1,4 +1,5 @@
 import { auth0 } from "@/lib/auth0";
+// import { getAccessToken } from '@auth0/nextjs-auth0';
 import './globals.css';
 
 export default async function Home() {
@@ -24,11 +25,13 @@ export default async function Home() {
     <main>
       <h1>Welcome, {session.user.name}!</h1>
       <p>{session.user.sub}</p>
+      <p>{JSON.stringify(session)}</p>
       <p>
         <a href="/auth/logout">
           <button>Log out</button>
         </a>
       </p>
+      {/* <button onClick={callProtectedApi}>Call Protected API</button> */}
     </main>
   );
 }

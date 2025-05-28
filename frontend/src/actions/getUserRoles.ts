@@ -39,6 +39,5 @@ export async function getUsersRoles(): Promise<Role[]> {
   }
 
   const data: Role[] = await response.json();
-  console.log("User roles:", data);
   return data;
 }
