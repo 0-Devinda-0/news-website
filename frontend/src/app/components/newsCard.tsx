@@ -1,0 +1,237 @@
+// src/components/NewsCard.tsx
+import React, { useState, useEffect } from "react";
+import EditNewsModal from "./editNews"; // Import the modal component
+
+interface NewsCardProps {
+    role: string;
+    title: string;
+    description: string;
+    likes: number;
+    views: number;
+    onLike?: () => void;
+    maxDescriptionLength?: number;
+    newsId: number; // Add a newsId prop to identify which news item is being edited
+    // onNewsUpdated: (id: string, newTitle: string, newDescription: string) => void; // Optional: To update parent state
+}
+
+const NewsCard: React.FC<NewsCardProps> = ({
+    role,
+    title,
+    description,
+    likes,
+    views,
+    onLike,
+    maxDescriptionLength = 150,
+    newsId,
+    // onNewsUpdated // If you pass this from parent
+}) => {
+    const [canEdit, setCanEdit] = useState(false); // Renamed from isEditable for clarity
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Determine if the user has editing privileges
+        if (role === "Admin" || role === "Editor") {
+            setCanEdit(true);
+        } else {
+            setCanEdit(false);
+        }
+    }, [role]);
+
+    // Function to truncate the description
+    const getTruncatedDescription = (text: string, maxLength: number) => {
+        if (text.length > maxLength) {
+            return text.substring(0, maxLength) + "...";
+        }
+        return text;
+    };
+
+    const displayedDescription = getTruncatedDescription(description, maxDescriptionLength);
+
+    const handleEditClick = () => {
+        setIsModalOpen(true);
+        setError(null); // Clear any previous errors when opening the modal
+    };
+
+    const handleSaveEditedNews = async (newTitle: string, newDescription: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            // Simulate API call
+            console.log(`Submitting update for News ID: ${newsId}`);
+            console.log("New Title:", newTitle);
+            console.log("New Description:", newDescription);
+
+            // --- REPLACE WITH YOUR ACTUAL API CALL ---
+            // Example using fetch (assuming a PUT or PATCH endpoint for /api/news/{newsId})
+            /*
+            const response = await fetch(`/api/news/${newsId}`, {
+              method: 'PUT', // or 'PATCH'
+              headers: {
+                'Content-Type': 'application/json',
+                // 'Authorization': `Bearer ${yourAuthToken}`, // if you have authentication
+              },
+              body: JSON.stringify({ title: newTitle, description: newDescription }),
+            });
+      
+            if (!response.ok) {
+              const errorData = await response.json(); // Assuming API returns JSON error
+              throw new Error(errorData.message || `API Error: ${response.status}`);
+            }
+      
+            const updatedNews = await response.json(); // If your API returns the updated item
+            console.log("News updated successfully:", updatedNews);
+            */
+
+            // --- Simulated API Success/Failure ---
+            const response = await new Promise((resolve, reject) => setTimeout(() => {
+                const success = Math.random() > 0.1; // 90% chance of success
+                if (success) {
+                    resolve({ status: 200, message: "News updated successfully!" });
+                } else {
+                    reject(new Error("Failed to update news. Network issue or server error."));
+                }
+            }, 1500)); // Simulate network delay
+
+            // If API call successful:
+            console.log("API response:", response);
+            alert("News updated successfully!"); // For demonstration
+
+            // IMPORTANT: Notify parent component to update its state or re-fetch data
+            // If you uncommented 'onNewsUpdated' prop:
+            // if (onNewsUpdated) {
+            //   onNewsUpdated(newsId, newTitle, newDescription);
+            // }
+
+            setIsModalOpen(false); // Close modal on success
+
+        } catch (err: unknown) {
+            console.error("Error updating news:", err);
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("An unknown error occurred during save.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <>
+        <div className="container py-3">
+            <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                <a href="#">
+                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        {title}
+                    </h5>
+                </a>
+                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                    {displayedDescription}
+                </p>
+
+                <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center space-x-4">
+                        <button
+                            onClick={onLike}
+                            className="flex items-center text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500"
+                            title="Like"
+                        >
+                            <svg
+                                className="w-5 h-5 mr-1"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                            <span className="text-sm font-medium">{likes}</span>
+                        </button>
+                        <div
+                            className="flex items-center text-gray-700 dark:text-gray-400"
+                            title="Views"
+                        >
+                            <svg
+                                className="w-5 h-5 mr-1"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                <path
+                                    fillRule="evenodd"
+                                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                            <span className="text-sm font-medium">{views}</span>
+                        </div>
+                    </div>
+
+                    {canEdit ? ( // Only show edit button if user can edit
+                        <button
+                            onClick={handleEditClick}
+                            className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
+                        >
+                            Edit News
+                            <svg
+                                className="w-4 h-4 ml-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                ></path>
+                            </svg>
+                        </button>
+                    ) : (
+                        // Regular "Read more" for non-editable users
+                        <a
+                            href="#"
+                            className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                            Read more
+                            <svg
+                                className="rtl:rotate-180 w-3.5 h-3.5 ms-2"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 14 10"
+                            >
+                                <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M1 5h12m0 0L9 1m4 4L9 9"
+                                />
+                            </svg>
+                        </a>
+                    )}
+                </div>
+            </div>
+</div>
+
+            <EditNewsModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                newsTitle={title}
+                newsDescription={description}
+                onSave={handleSaveEditedNews}
+                isLoading={isLoading}
+                error={error} />
+        </>
+    );
+};
+
+export default NewsCard;

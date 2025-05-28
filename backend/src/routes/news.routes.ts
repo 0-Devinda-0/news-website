@@ -4,7 +4,7 @@ import checkRoles from '../middleware/checkRole.middleware';
 import * as newsController from '../controllers/news.controller';
 const router = Router();
 
-router.get('/', checkJwt, checkRoles(['Admin']), newsController.getAllNews, (req, res) => {
+router.get('/', checkJwt, checkRoles(['Admin','Editor','Basic']), newsController.getAllNews, (req, res) => {
     console.log('Authenticated user ID:', req.auth?.payload.sub);
     res.json({ message: 'Hello from a private endpoint! You are authenticated.' });
 });
