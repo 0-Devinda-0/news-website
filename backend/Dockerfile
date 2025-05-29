@@ -1,38 +1,40 @@
 # syntax=docker/dockerfile:1
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
-
+# Stage 1: Build the application
 ARG NODE_VERSION=22.14.0
+FROM node:${NODE_VERSION}-alpine AS builder
 
-FROM node:${NODE_VERSION}-alpine
+WORKDIR /app
 
-# Use production node environment by default.
-ENV NODE_ENV production
+# Copy only package.json and package-lock.json (if available) to leverage caching
+COPY package*.json ./
 
+# Install dependencies (only production dependencies)
+RUN npm ci
 
-WORKDIR /usr/src/app
+# Install TypeScript globally for the build
+RUN npm install -g typescript
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.npm to speed up subsequent builds.
-# Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into
-# into this layer.
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=package-lock.json,target=package-lock.json \
-    --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev
-
-# Run the application as a non-root user.
-USER node
-
-# Copy the rest of the source files into the image.
+# Copy the rest of the application source code
 COPY . .
 
-# Expose the port that the application listens on.
+# Build the TypeScript application
+RUN npm run build
+
+# Stage 2: Create the runtime image
+FROM node:${NODE_VERSION}-alpine
+
+WORKDIR /app
+
+# Copy only the necessary files from the builder stage
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+
+# Install only production dependencies
+RUN npm ci --omit=dev --ignore-scripts
+
+# Expose the port that the application listens on
 EXPOSE 3001
 
-# Run the application.
-CMD npx ts-node src/server.ts
+# Run the application
+CMD ["node", "dist/server.js"]

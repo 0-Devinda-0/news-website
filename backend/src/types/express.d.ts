@@ -3,11 +3,11 @@
 // It needs to be picked up by your tsconfig.json.
 
 import { Request } from 'express';
-import { JwtPayload } from 'express-oauth2-jwt-bearer'; // Import JwtPayload type
+import { JWTPayload } from 'express-oauth2-jwt-bearer'; // Import JwtPayload type
 
 // Extend the JwtPayload provided by express-oauth2-jwt-bearer
 // to include your custom namespaced claim.
-export interface CustomJwtPayload extends JwtPayload {
+export interface CustomJwtPayload extends JWTPayload {
   'https://my-app.example.com/roles'?: string[]; // Your custom roles claim
   // Add other custom claims here if needed
 }
