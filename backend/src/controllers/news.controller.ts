@@ -43,7 +43,7 @@ export const createNews = async (req: Request, res: Response, next: NextFunction
     try {
         const newsData = req.body;
         const newNews = await newsService.addNewsArticle(newsData); 
-        res.status(201).json(newNews);
+        res.status(200).json({ id: newNews });
     } catch (error) {
         next(error);
     }
@@ -67,14 +67,14 @@ export const updateNews = async (req: Request, res: Response, next: NextFunction
 
 export const deleteNews = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const id = Number(req.params.id);
+        const id = Number(req.body.id);
         const deleted = await newsService.deleteNewsArticle(id); 
 
         if (!deleted) {
             res.status(404).json({ message: 'News article not found' });
             return;
         }
-        res.status(204).send();
+        res.status(200).json({ success: true });
     } catch (error) {
         next(error);
     }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import EditNewsModal from "./editNews"; 
 import { apiClient } from "@/lib/apiClient";
@@ -9,9 +8,11 @@ interface NewsCardProps {
     description: string;
     likes: number;
     views: number;
+    category: string; 
     onLike?: () => void;
     maxDescriptionLength?: number;
-    newsId: number; 
+    newsId: number;
+    onDeleteSuccess?: () => void;
 }
 
 const NewsCard: React.FC<NewsCardProps> = ({
@@ -19,14 +20,16 @@ const NewsCard: React.FC<NewsCardProps> = ({
     title,
     description,
     likes,
+    category,
     views,
     onLike,
     maxDescriptionLength = 150,
     newsId,
-    
+    onDeleteSuccess,
 }) => {
     const [canEdit, setCanEdit] = useState(false); 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +41,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
         }
     }, [role]);
 
-    
     const getTruncatedDescription = (text: string, maxLength: number) => {
         if (text.length > maxLength) {
             return text.substring(0, maxLength) + "...";
@@ -53,12 +55,15 @@ const NewsCard: React.FC<NewsCardProps> = ({
         setError(null); 
     };
 
+    const handleDeleteClick = () => {
+        setIsDeleteModalOpen(true);
+    };
+
     const handleSaveEditedNews = async (newTitle: string, newDescription: string) => {
         setIsLoading(true);
         setError(null);
 
         try {
-           
             const response = await apiClient(`http://localhost:3001/api/news/edit-article`, {
                 method: "POST",
                 headers: {
@@ -72,7 +77,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
             });
 
             console.log("News updated successfully:", response);
-            setIsModalOpen(false); // Close modal
+            setIsModalOpen(false);
 
         } catch (err: unknown) {
             console.error("Error updating news:", err);
@@ -81,6 +86,29 @@ const NewsCard: React.FC<NewsCardProps> = ({
             } else {
                 setError("An unknown error occurred during save.");
             }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleDeleteConfirmed = async () => {
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            await apiClient(`http://localhost:3001/api/news/delete-article`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id: newsId }),
+            });
+
+            setIsDeleteModalOpen(false);
+            onDeleteSuccess?.();
+        } catch (err: any) {
+            console.error("Error deleting news:", err);
+            setError(err.message || "Failed to delete article");
         } finally {
             setIsLoading(false);
         }
@@ -163,26 +191,34 @@ const NewsCard: React.FC<NewsCardProps> = ({
                                 </svg>
                             </a>
                             {canEdit && (
-                                <button
-                                    onClick={handleEditClick}
-                                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
-                                >
-                                    Edit News
-                                    <svg
-                                        className="w-4 h-4 ml-2"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
+                                <>
+                                    <button
+                                        onClick={handleEditClick}
+                                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:ring-4 focus:outline-none focus:ring-indigo-300 dark:bg-indigo-500 dark:hover:bg-indigo-600 dark:focus:ring-indigo-800"
                                     >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                        ></path>
-                                    </svg>
-                                </button>
+                                        Edit News
+                                        <svg
+                                            className="w-4 h-4 ml-2"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                            ></path>
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteClick}
+                                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300"
+                                    >
+                                        Delete
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -194,9 +230,36 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 onClose={() => setIsModalOpen(false)}
                 newsTitle={title}
                 newsDescription={description}
+                newsCategory={category}
                 onSave={handleSaveEditedNews}
                 isLoading={isLoading}
-                error={error} />
+                error={error}
+            />
+
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/30 backdrop-blur-sm bg-opacity-10">
+                    <div className="bg-white p-6 rounded-lg shadow-md w-96">
+                        <h2 className="text-lg font-semibold text-red-600 mb-2">Delete Article</h2>
+                        <p className="mb-4 text-gray-700">Are you sure you want to delete this article?</p>
+                        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirmed}
+                                className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Deleting..." : "Delete"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

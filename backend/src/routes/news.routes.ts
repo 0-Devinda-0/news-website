@@ -10,7 +10,7 @@ router.get('/', checkJwt, checkRoles(['Admin','Editor','Basic']), newsController
 });
 
 router.post('/create-article', checkJwt, checkRoles(['Admin']),newsController.createNews, (req, res) => {
-  console.log('Authenticated user ID:', req.auth?.payload.sub);
+  console.log('Attempting to create data by Admin:', req.auth?.payload.sub);
     
 });
 
@@ -19,7 +19,7 @@ router.post('/edit-article', checkJwt, checkRoles(['Admin', 'Editor']),newsContr
     
 });
 
-router.delete('/delete-data', checkJwt, checkRoles(['Admin']),newsController.deleteNews, (req, res) => {
+router.delete('/delete-article', checkJwt, checkRoles(['Admin']),newsController.deleteNews, (req, res) => {
     console.log('Attempting to delete data by Admin:', req.auth?.payload.sub);
     
 });

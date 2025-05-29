@@ -5,8 +5,8 @@ import { News } from '../types/news.interface';
 
 export const createArticle = async (article: Omit<News, 'id'>): Promise<number | null> => {
     const [result] = await pool.execute<ResultSetHeader>(
-        'INSERT INTO articles (title, description, author, created_at) VALUES (?, ?, ?, ?)',
-        [article.title, article.description, article.author, article.created_at]
+        'INSERT INTO articles (title, description, author, category) VALUES (?, ?, ?, ?)',
+        [article.title, article.description, article.author, article.category]
     );
     return result.insertId;
 };
