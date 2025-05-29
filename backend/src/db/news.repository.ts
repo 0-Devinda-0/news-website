@@ -1,7 +1,7 @@
 
 import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import pool from '../config/db.config';
-import { News } from '../types/news.interface'; 
+import { News } from '../types/news.interface';
 
 export const createArticle = async (article: Omit<News, 'id'>): Promise<number | null> => {
     const [result] = await pool.execute<ResultSetHeader>(
@@ -11,10 +11,26 @@ export const createArticle = async (article: Omit<News, 'id'>): Promise<number |
     return result.insertId;
 };
 
-export const getAllArticles = async (): Promise<News[]> => {
-    const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM articles');
-    return rows as News[];
+export const getAllArticles = async (
+  category?: string,
+  sortBy: 'date' | 'likes' | 'views' = 'date',
+  order: 'ASC' | 'DESC' = 'DESC'
+): Promise<News[]> => {
+  let query = 'SELECT * FROM articles';
+  const params: any[] = [];
+
+  if (category) {
+    query += ' WHERE category = ?';
+    params.push(category);
+  }
+
+  query += ` ORDER BY ${sortBy} ${order}`;
+
+  const [rows] = await pool.execute<RowDataPacket[]>(query, params);
+  return rows as News[];
 };
+
+
 
 export const getArticleById = async (id: number): Promise<News | null> => {
     const [rows] = await pool.execute<RowDataPacket[]>('SELECT * FROM articles WHERE id = ?', [id]);
@@ -29,7 +45,7 @@ export const updateArticle = async (id: number, article: Partial<Omit<News, 'id'
     const values = Object.values(article);
 
     if (fields.length === 0) {
-        return false; 
+        return false;
     }
 
     const setClauses = fields.map(field => `${field} = ?`).join(', ');

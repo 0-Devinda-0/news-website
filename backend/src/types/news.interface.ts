@@ -4,6 +4,6 @@ export interface News {
     title: string;
     description?: string;
     author?: string; 
-    created_at?: Date; // Assuming your DB has this
-    updated_at?: Date; // Assuming your DB has this
+    created_at?: Date;
+    updated_at?: Date; 
 }

@@ -27,9 +27,14 @@ export const addNewsArticle = async (newsData: Omit<News, 'id'>): Promise<number
  * Retrieves all news articles.
  * @returns A promise that resolves to an array of NewsArticle objects.
  */
-export const getAllNews = async (): Promise<News[]> => {
-    return newsRepository.getAllArticles();
+export const getAllNews = async (
+  category?: string,
+  sortBy?: 'date' | 'likes' | 'views',
+  order?: 'ASC' | 'DESC'
+): Promise<News[]> => {
+  return newsRepository.getAllArticles(category, sortBy || 'date', order || 'DESC');
 };
+
 
 /**
  * Retrieves a single news article by its ID.

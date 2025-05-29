@@ -19,7 +19,7 @@ interface DecodedToken {
 }
 
 export function UserRolesProvider({ children }: { children: ReactNode }) {
-    const { user, isLoading } = useUser();
+    const { user,isLoading } = useUser();
     const [roles, setRoles] = useState<string[]>([]);
     const [isLoadingRoles, setIsLoadingRoles] = useState(true);
     const [errorRoles, setErrorRoles] = useState<Error | undefined>(undefined);
