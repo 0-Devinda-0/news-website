@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import checkJwt from './middleware/auth.middleware';
 import errorHandler from './middleware/error.middleware';
 import apiRoutes from './routes/index';
@@ -16,7 +16,7 @@ app.use('/api', apiRoutes); // Importing routes
 
 // Protected route (requires a valid access token)
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     res.status(404).json({ message: 'Not Found' });
 });
 
