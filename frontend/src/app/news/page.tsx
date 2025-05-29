@@ -14,6 +14,7 @@ interface NewsArticle {
   author: string;
   likes: number;
   views: number;
+  category: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -31,7 +32,7 @@ export default function AdminPage() {
       const query = new URLSearchParams();
       if (category) query.append("category", category);
       if (sortBy) query.append("sortBy", sortBy);
-      query.append("order", "DESC"); // optional: or make dynamic
+      query.append("order", "DESC");
 
       const response = await apiClient(`http://localhost:3001/api/news?${query.toString()}`, {
         method: "GET",
@@ -109,7 +110,7 @@ export default function AdminPage() {
                       <option value="politics">Politics</option>
                       <option value="sports">Sports</option>
                       <option value="world">World</option>
-                      {/* Add more if needed */}
+                    
                     </select>
                   </div>
 
@@ -147,8 +148,8 @@ export default function AdminPage() {
                   description={article.description}
                   likes={article.likes}
                   views={article.views}
-                  newsId={article.id}
-                />
+                  newsId={article.id} 
+                  category={article.category}                />
               ))}
             </div>
           )}

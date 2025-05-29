@@ -1,4 +1,3 @@
-// src/components/EditNewsModal.tsx (No changes from previous version)
 import React, { useState, useEffect } from "react";
 
 interface EditNewsModalProps {

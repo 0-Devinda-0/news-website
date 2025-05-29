@@ -6,7 +6,7 @@ export default async function Home() {
   const session = await auth0.getSession();
 
   if (session) {
-    // Redirect logged-in users to /admin
+    // Redirect logged-in users to /news
     redirect('/news');
   }
 

@@ -166,7 +166,10 @@ const NewsCard: React.FC<NewsCardProps> = ({
                                     />
                                 </svg>
                                 <span className="text-sm font-medium">{views}</span>
+                          
+                             <p className="ms-3">{category.charAt(0).toUpperCase() + category.slice(1)}</p>
                             </div>
+                            
                         </div>
                         <div className="d-flex items-center space-x-4 rtl:space-x-reverse">
                             <a

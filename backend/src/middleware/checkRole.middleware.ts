@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { CustomJwtPayload } from '../types/express.d'; // We'll define this type below
+import { CustomJwtPayload } from '../types/express.d';
 
 /**
  * Middleware to check if the authenticated user has any of the specified roles.
@@ -7,12 +7,8 @@ import { CustomJwtPayload } from '../types/express.d'; // We'll define this type
  */
 const checkRoles = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    // req.auth is populated by express-oauth2-jwt-bearer
-    // We need to cast it to our custom type that includes roles
     const authPayload = req.auth?.payload as CustomJwtPayload | undefined;
-
     if (!authPayload || !authPayload['https://my-app.example.com/roles']) {
-      // User is authenticated but no roles claim found or payload is missing
       return res.status(403).json({ message: 'Forbidden: No roles assigned or token malformed.' });
     }
 
@@ -22,7 +18,7 @@ const checkRoles = (allowedRoles: string[]) => {
     const hasRequiredRole = allowedRoles.some(role => userRoles.includes(role));
 
     if (hasRequiredRole) {
-      next(); // User has the required role, proceed to the next middleware/route handler
+      next();
     } else {
       res.status(403).json({ message: 'Forbidden: Insufficient permissions.' });
     }

@@ -1,5 +1,4 @@
 import express, { Request, Response, NextFunction } from 'express';
-import checkJwt from './middleware/auth.middleware';
 import errorHandler from './middleware/error.middleware';
 import apiRoutes from './routes/index';
 
