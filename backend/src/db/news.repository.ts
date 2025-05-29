@@ -12,22 +12,22 @@ export const createArticle = async (article: Omit<News, 'id'>): Promise<number |
 };
 
 export const getAllArticles = async (
-  category?: string,
-  sortBy: 'date' | 'likes' | 'views' = 'date',
-  order: 'ASC' | 'DESC' = 'DESC'
+    category?: string,
+    sortBy: 'date' | 'likes' | 'views' = 'date',
+    order: 'ASC' | 'DESC' = 'DESC'
 ): Promise<News[]> => {
-  let query = 'SELECT * FROM articles';
-  const params: any[] = [];
+    let query = 'SELECT * FROM articles';
+    const params: any[] = [];
 
-  if (category) {
-    query += ' WHERE category = ?';
-    params.push(category);
-  }
+    if (category) {
+        query += ' WHERE category = ?';
+        params.push(category);
+    }
 
-  query += ` ORDER BY ${sortBy} ${order}`;
+    query += ` ORDER BY ${sortBy} ${order}`;
 
-  const [rows] = await pool.execute<RowDataPacket[]>(query, params);
-  return rows as News[];
+    const [rows] = await pool.execute<RowDataPacket[]>(query, params);
+    return rows as News[];
 };
 
 
