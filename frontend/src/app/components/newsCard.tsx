@@ -28,6 +28,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
     onDeleteSuccess,
 }) => {
     const [canEdit, setCanEdit] = useState(false); 
+    const [canDelete, setCanDelete] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +39,11 @@ const NewsCard: React.FC<NewsCardProps> = ({
             setCanEdit(true);
         } else {
             setCanEdit(false);
+        }
+        if (role === "Admin") {
+            setCanDelete(true);
+        } else {
+            setCanDelete(false);
         }
     }, [role]);
 
@@ -80,7 +86,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
             setIsModalOpen(false);
 
         } catch (err: unknown) {
-            console.error("Error updating news:", err);
+            
             if (err instanceof Error) {
                 setError(err.message);
             } else {
@@ -106,9 +112,13 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
             setIsDeleteModalOpen(false);
             onDeleteSuccess?.();
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error deleting news:", err);
-            setError(err.message || "Failed to delete article");
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError("Failed to delete article");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -215,13 +225,16 @@ const NewsCard: React.FC<NewsCardProps> = ({
                                             ></path>
                                         </svg>
                                     </button>
-                                    <button
+                                    
+                                </>
+                            )}
+                            {canDelete &&(
+                                <button
                                         onClick={handleDeleteClick}
                                         className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300"
                                     >
                                         Delete
                                     </button>
-                                </>
                             )}
                         </div>
                     </div>

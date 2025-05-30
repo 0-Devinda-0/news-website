@@ -5,8 +5,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/apiClient";
 
-export default function CreateNewsPage() {
+interface ApiResponse {
+  id?: string | number; // Adjust based on the actual type of `id`
+  error?: string; // Optionally include error details
+  // Add other properties as needed
+}
 
+export default function CreateNewsPage() {
+    
     const router = useRouter();
     const { user, error, isLoading } = useUser();
     const [title, setTitle] = useState("");
@@ -40,7 +46,10 @@ export default function CreateNewsPage() {
         const errors: { title?: string; description?: string } = {};
         if (!title.trim()) errors.title = "Title is required.";
         if (!description.trim()) errors.description = "Description is required.";
-        setFieldErrors(errors as any);
+        setFieldErrors({
+            title: errors.title ?? "",
+            description: errors.description ?? "",
+        });
         return Object.keys(errors).length === 0;
     };
 
@@ -52,7 +61,7 @@ export default function CreateNewsPage() {
 
         setLoading(true);
         try {
-            const response = await apiClient("http://localhost:3001/api/news/create-article", {
+            const response:ApiResponse = await apiClient("http://localhost:3001/api/news/create-article", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -65,12 +74,12 @@ export default function CreateNewsPage() {
                 }),
             });
 
-            if (response?.id) {
-                
+            if (response?.id) { 
                 router.push("/news");
             } else {
                 setError(`Failed to create article. Try again. ${response}`);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (err) {
             setError(`Something went wrong. Please try again.`);
         } finally {
